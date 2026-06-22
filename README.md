@@ -20,7 +20,7 @@ val a = Complex.arg z                  (* atan2 (4, 3)        *)
 
 (* Euler's identity: exp(i*pi) = ~1 (+ rounding) *)
 val e = Complex.exp (Complex.complex (0.0, Math.pi))
-val () = print (Complex.toString e ^ "\n")   (* ~1.0 + 1.2e~16i *)
+val () = print (Complex.toString e ^ "\n")   (* -1.000000 + 0.000000i *)
 
 (* z^w via exp (w * ln z) *)
 val w = Complex.pow (z, Complex.complex (2.0, 0.0))   (* z^2 = z*z *)

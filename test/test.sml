@@ -230,9 +230,9 @@ struct
       (* ---- toString ---- *)
       val () = Harness.section "toString"
       val () = Harness.checkString "positive imaginary"
-                 ("1.0 + 2.0i", C.toString (C.complex (1.0, 2.0)))
+                 ("1.000000 + 2.000000i", C.toString (C.complex (1.0, 2.0)))
       val () = Harness.checkString "negative imaginary"
-                 ("3.0 - 4.0i", C.toString (C.complex (3.0, ~4.0)))
+                 ("3.000000 - 4.000000i", C.toString (C.complex (3.0, ~4.0)))
     in
       ()
     end
