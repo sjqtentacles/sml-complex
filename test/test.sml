@@ -104,6 +104,106 @@ struct
       val () = Harness.check "z^1 = z"
                  (approxC eps (C.pow (zr, C.complex (1.0, 0.0)), zr))
 
+      (* ---- trigonometric functions ---- *)
+      val () = Harness.section "Trigonometric functions"
+      (* Real arguments agree with Math.{sin,cos,tan}. *)
+      val () = Harness.check "sin(real) = Math.sin"
+                 (approxC eps
+                    (C.sin (C.complex (0.7, 0.0)),
+                     C.complex (Math.sin 0.7, 0.0)))
+      val () = Harness.check "cos(real) = Math.cos"
+                 (approxC eps
+                    (C.cos (C.complex (0.7, 0.0)),
+                     C.complex (Math.cos 0.7, 0.0)))
+      (* sin i = i sinh 1, cos i = cosh 1 (canonical values). *)
+      val () = Harness.check "sin(i) = i*sinh(1)"
+                 (approxC eps
+                    (C.sin i, C.complex (0.0, 1.1752011936438014)))
+      val () = Harness.check "cos(i) = cosh(1)"
+                 (approxC eps
+                    (C.cos i, C.complex (1.5430806348152437, 0.0)))
+      val () = Harness.check "tan = sin/cos"
+                 (approxC eps
+                    (C.tan zl, C.divide (C.sin zl, C.cos zl)))
+      (* Pythagorean identity sin^2 z + cos^2 z = 1. *)
+      val () = Harness.check "sin^2 + cos^2 = 1"
+                 (approxC eps
+                    (C.add (C.mul (C.sin zl, C.sin zl),
+                            C.mul (C.cos zl, C.cos zl)),
+                     C.complex (1.0, 0.0)))
+
+      (* ---- hyperbolic functions ---- *)
+      val () = Harness.section "Hyperbolic functions"
+      val () = Harness.check "sinh(i) = i*sin(1)"
+                 (approxC eps
+                    (C.sinh i, C.complex (0.0, Math.sin 1.0)))
+      val () = Harness.check "cosh(i) = cos(1)"
+                 (approxC eps
+                    (C.cosh i, C.complex (Math.cos 1.0, 0.0)))
+      val () = Harness.check "cosh^2 - sinh^2 = 1"
+                 (approxC eps
+                    (C.sub (C.mul (C.cosh zl, C.cosh zl),
+                            C.mul (C.sinh zl, C.sinh zl)),
+                     C.complex (1.0, 0.0)))
+      val () = Harness.check "tanh = sinh/cosh"
+                 (approxC eps
+                    (C.tanh zl, C.divide (C.sinh zl, C.cosh zl)))
+      (* sin(iz) = i sinh(z). *)
+      val () = Harness.check "sin(iz) = i*sinh(z)"
+                 (approxC eps
+                    (C.sin (C.mul (i, zl)), C.mul (i, C.sinh zl)))
+
+      (* ---- inverse trigonometric functions ---- *)
+      val () = Harness.section "Inverse trigonometric functions"
+      val () = Harness.check "atan(1) = pi/4"
+                 (approxC eps
+                    (C.atan (C.complex (1.0, 0.0)), C.complex (pi / 4.0, 0.0)))
+      val () = Harness.check "asin(sin z) = z"
+                 (approxC eps (C.asin (C.sin zl), zl))
+      val () = Harness.check "acos(cos z) = z"
+                 (approxC eps (C.acos (C.cos zl), zl))
+      val () = Harness.check "atan(tan z) = z"
+                 (approxC eps (C.atan (C.tan zl), zl))
+      (* asin of a real > 1 has a known complex principal value. *)
+      val () = Harness.check "asin(2) principal value"
+                 (approxC eps
+                    (C.asin (C.complex (2.0, 0.0)),
+                     C.complex (1.5707963267948966, ~1.3169578969248166)))
+
+      (* ---- inverse hyperbolic functions ---- *)
+      val () = Harness.section "Inverse hyperbolic functions"
+      val () = Harness.check "asinh(sinh z) = z"
+                 (approxC eps (C.asinh (C.sinh zl), zl))
+      val () = Harness.check "acosh(cosh z) = z"
+                 (approxC eps (C.acosh (C.cosh zl), zl))
+      val () = Harness.check "atanh(tanh z) = z"
+                 (approxC eps (C.atanh (C.tanh zl), zl))
+      val () = Harness.check "atanh(0.5) = 0.5*ln 3"
+                 (approxC eps
+                    (C.atanh (C.complex (0.5, 0.0)),
+                     C.complex (0.5 * Math.ln 3.0, 0.0)))
+
+      (* ---- nthRoots ---- *)
+      val () = Harness.section "nthRoots"
+      (* Each n-th root, raised to the n-th power, returns z. *)
+      val cubeRoots = C.nthRoots (zr, 3)
+      val () = Harness.checkInt "nthRoots count" (3, List.length cubeRoots)
+      val () = Harness.check "each cube root ^3 = z"
+                 (List.all
+                    (fn w => approxC eps (C.pow (w, C.complex (3.0, 0.0)), zr))
+                    cubeRoots)
+      (* The n n-th roots sum to zero for n >= 2. *)
+      val () = Harness.check "n-th roots sum to 0"
+                 (approxC eps (sumC (C.nthRoots (C.complex (8.0, 0.0), 5)),
+                               C.complex (0.0, 0.0)))
+      (* Cube roots of 8 have modulus 2; principal root is 2. *)
+      val () = Harness.check "principal cube root of 8 = 2"
+                 (approxC eps
+                    (hd (C.nthRoots (C.complex (8.0, 0.0), 3)),
+                     C.complex (2.0, 0.0)))
+      val () = Harness.checkRaises "nthRoots 0 raises"
+                 (fn () => C.nthRoots (zr, 0))
+
       (* ---- conj / abs / arg identities ---- *)
       val () = Harness.section "conj, abs, arg identities"
       val () = Harness.check "conj(conj z) = z"

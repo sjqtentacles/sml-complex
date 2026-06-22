@@ -2,7 +2,8 @@
 
 Complex numbers over `real` in pure Standard ML. A small, dependency-free
 `structure Complex :> COMPLEX` with the field operations plus the principal
-branches of `exp`, `ln`, `sqrt`, and `pow`, and conversions to and from polar
+branches of `exp`, `ln`, `sqrt`, `pow`, the trigonometric / hyperbolic
+functions and their inverses, `nthRoots`, and conversions to and from polar
 form. Builds and tests with both **MLton** and **Poly/ML**.
 
 The representation is abstract: build values with `complex` or `fromPolar`,
@@ -44,6 +45,19 @@ val exp       : t -> t
 val ln        : t -> t
 val sqrt      : t -> t                           (* principal root     *)
 val pow       : t * t -> t
+val sin       : t -> t
+val cos       : t -> t
+val tan       : t -> t
+val sinh      : t -> t
+val cosh      : t -> t
+val tanh      : t -> t
+val asin      : t -> t                           (* principal branches *)
+val acos      : t -> t
+val atan      : t -> t
+val asinh     : t -> t
+val acosh     : t -> t
+val atanh     : t -> t
+val nthRoots  : t * int -> t list                (* n distinct n-th roots *)
 val fromPolar : {r : real, theta : real} -> t
 val toPolar   : t -> {r : real, theta : real}
 val toString  : t -> string
@@ -51,7 +65,12 @@ val toString  : t -> string
 
 The transcendentals use the standard principal-branch definitions:
 `exp (a + bi) = e^a (cos b + i sin b)`, `ln z = ln |z| + i arg z`, principal
-`sqrt`, and `pow (z, w) = exp (w * ln z)`.
+`sqrt`, and `pow (z, w) = exp (w * ln z)`. The trig and hyperbolic functions
+follow the usual identities (e.g. `sin (a + bi) = sin a cosh b + i cos a sinh b`,
+`sinh (a + bi) = sinh a cos b + i cosh a sin b`); the inverses use the principal
+branches (`asin z = -i ln (iz + sqrt (1 - z^2))`, `acos z = pi/2 - asin z`,
+`atan z = (i/2)(ln (1 - iz) - ln (1 + iz))`, and the analogous inverse hyperbolic
+forms). `nthRoots (z, n)` returns the `n` solutions of `w^n = z`.
 
 ## Building and testing
 
@@ -74,6 +93,11 @@ is built on floating-point `real`. Highlights:
   (`n = 3, 5, 8`).
 - **Inverses/identities:** `sqrt(z)^2 ~= z`, `ln(exp z) ~= z`, and the
   `conj`/`abs`/`arg` identities.
+- **Trig/hyperbolic:** the Pythagorean identity `sin^2 z + cos^2 z = 1`,
+  `cosh^2 z - sinh^2 z = 1`, canonical values (`sin i = i sinh 1`,
+  `cos i = cosh 1`), and round-trips `asin(sin z) ~= z`, `atanh(tanh z) ~= z`.
+- **Roots:** every value of `nthRoots (z, n)` raised to the `n`-th power
+  returns `z`, and the `n` roots sum to `~= 0`.
 
 ### Poly/ML note
 
