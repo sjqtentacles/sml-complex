@@ -233,6 +233,56 @@ struct
                  ("1.000000 + 2.000000i", C.toString (C.complex (1.0, 2.0)))
       val () = Harness.checkString "negative imaginary"
                  ("3.000000 - 4.000000i", C.toString (C.complex (3.0, ~4.0)))
+
+      (* ---- properties (sml-check) ---- *)
+      val () = Harness.section "Complex: properties (sml-check)"
+
+      (* Generator: bound the range to keep floating error small and avoid
+         abs/mul overflow surprises. |a*b| can be up to ~2e4 with this range,
+         still comfortably in double precision. *)
+      val genComponent = Check.realRange (~100.0, 100.0)
+      val genC : Complex.t Check.gen =
+        Check.map C.complex (Check.tuple2 (genComponent, genComponent))
+
+      fun fmtR x =
+        let val s = Real.fmt (StringCvt.FIX (SOME 6)) x
+        in if s = "-0.000000" then "0.000000" else s end
+      fun showC z = "(" ^ fmtR (C.re z) ^ " + " ^ fmtR (C.im z) ^ "i)"
+
+      (* a + b - b = a *)
+      val () =
+        Harness.check "prop: a + b - b = a"
+          (case Check.quickCheck
+                  (Check.forAll (Check.tuple2 (genC, genC))
+                     (fn (a, b) => showC a ^ ", " ^ showC b)
+                     (fn (a, b) => approxC eps (C.sub (C.add (a, b), b), a))) of
+               Check.Passed _ => true
+             | Check.Failed _ => false)
+
+      (* conj (conj a) = a *)
+      val () =
+        Harness.check "prop: conj (conj a) = a"
+          (case Check.quickCheck
+                  (Check.forAll genC showC
+                     (fn a => approxC eps (C.conj (C.conj a), a))) of
+               Check.Passed _ => true
+             | Check.Failed _ => false)
+
+      (* abs (a * b) = abs a * abs b -- magnitude multiplication accumulates
+         more floating error than addition, so this needs a much more
+         generous epsilon than the additive identities above. *)
+      val () =
+        let val eps2 = 1E~6
+        in
+          Harness.check "prop: abs (a * b) = abs a * abs b"
+            (case Check.quickCheck
+                    (Check.forAll (Check.tuple2 (genC, genC))
+                       (fn (a, b) => showC a ^ ", " ^ showC b)
+                       (fn (a, b) =>
+                          approx eps2 (C.abs (C.mul (a, b)), C.abs a * C.abs b))) of
+                 Check.Passed _ => true
+               | Check.Failed _ => false)
+        end
     in
       ()
     end
