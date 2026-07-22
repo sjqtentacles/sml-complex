@@ -1,5 +1,7 @@
 # sml-complex
 
+[![CI](https://github.com/sjqtentacles/sml-complex/actions/workflows/ci.yml/badge.svg)](https://github.com/sjqtentacles/sml-complex/actions/workflows/ci.yml)
+
 Complex numbers over `real` in pure Standard ML. A small, dependency-free
 `structure Complex :> COMPLEX` with the field operations plus the principal
 branches of `exp`, `ln`, `sqrt`, `pow`, the trigonometric / hyperbolic
